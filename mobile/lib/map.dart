@@ -66,17 +66,17 @@ class _TravelMapState extends State<TravelMap> {
   //   return values["routes"][0]["overview_polyline"]["points"];
   // }
 
-  // Set<Marker> marker() {
-  //   return <Marker>[
-  //     // allMarker.add(
-  //     Marker(
-  //       markerId: MarkerId('myMarker'),
-  //       draggable: false,
-  //       position: LatLng(lat, lng),
-  //       // ),
-  //     )
-  //   ].toSet();
-  // }
+  Set<Marker> marker() {
+    return <Marker>[
+      // allMarker.add(
+      Marker(
+        markerId: MarkerId('myMarker'),
+        draggable: false,
+        position: LatLng(_lat2.latitude, _lat2.longitude),
+        // ),
+      )
+    ].toSet();
+  }
 
   Set<Polyline> createPolyline() {
     return <Polyline>[
@@ -278,8 +278,8 @@ class _TravelMapState extends State<TravelMap> {
         myLocationEnabled: true,
         compassEnabled: true,
         tiltGesturesEnabled: false,
-        markers: _markers,
-        polylines: _polylines,
+        markers: marker(),
+        polylines: createPolyline(),
         mapType: MapType.normal,
         initialCameraPosition: CameraPosition(
           target: currentPosition,

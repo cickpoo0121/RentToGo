@@ -11,6 +11,7 @@ class TravelCard extends StatefulWidget {
 
 class _TravelCardState extends State<TravelCard> {
   List data;
+
   void getTrip() async {
     http.Response response = await http.get(url + '/trip');
 
@@ -32,10 +33,10 @@ class _TravelCardState extends State<TravelCard> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    return data.length == 0
+    return data == null
         ? MyStyle().circleProgress()
         : Container(
-            height: size.height/1.42,
+            height: size.height / 1.42,
             child: ListView.builder(
               shrinkWrap: true,
               itemCount: data.length,
@@ -67,8 +68,8 @@ class _TravelCardState extends State<TravelCard> {
                     print(data);
                     Navigator.pushNamed(
                       context,
-                      '/Meaning',
-                      arguments: data[index],
+                      '/map',
+                      arguments: data[index]['TripID'],
                     );
                   },
                 );

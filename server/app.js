@@ -80,6 +80,22 @@ app.get('/trip',function(req,res){
     });
 })
 
+//----------- Home Infomation ----------------
+
+app.get('/tripInfo/:tripID',function(req,res){
+    tripid=req.params.tripID
+    const sql ='SELECT * FROM `tripinfo` WHERE TripID=?';
+    con.query(sql,[tripid],function(err,result){
+        if(err){
+            console.log(err)
+            res.status(500).send('Server error');
+        }
+        else{
+            res.status(200).send(result);
+        }
+    });
+})
+
 
 //========== Starting Server ============
 app.listen(3000, function () {
