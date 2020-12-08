@@ -1,7 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:rentogo/constance.dart';
 import 'package:rentogo/createTrip.dart';
 import 'package:rentogo/favoritePlane.dart';
 import 'package:rentogo/profile.dart';
+import 'package:rentogo/travelCard.dart';
 
 class Homepage extends StatefulWidget {
   @override
@@ -10,6 +15,7 @@ class Homepage extends StatefulWidget {
 
 class _HomepageState extends State<Homepage> {
   TextEditingController _search = TextEditingController();
+ 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -86,8 +92,8 @@ class _HomepageState extends State<Homepage> {
                             borderRadius: BorderRadius.circular(25.0))),
                   ),
                 ),
-                Category(),
-                TravelCard()
+                // Category(),
+                TravelCard(),
               ],
             ),
             CreatTrip(),
@@ -100,47 +106,6 @@ class _HomepageState extends State<Homepage> {
   }
 }
 
-class TravelCard extends StatefulWidget {
-  @override
-  _TravelCardState createState() => _TravelCardState();
-}
-
-class _TravelCardState extends State<TravelCard> {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Card(
-          child: InkWell(
-            splashColor: Colors.blue.withAlpha(30),
-            onTap: () {
-              print('Card tapped.');
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Image.asset(
-                    'assets/images/temple.jpg',
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    'แอ่วกิ๋นฟิน West',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  Text('297 บาท 10 ชั่วโมง 7 แหล่งสถานที่ท่องเที่ยว '),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 class Category extends StatefulWidget {
   @override

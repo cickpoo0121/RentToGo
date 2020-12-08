@@ -2,6 +2,6 @@ const config = {
     host: 'localhost',
     user: 'root',
     password: '',
-    database: 'member'
+    database: 'renttogo'
 }
 module.exports = config;

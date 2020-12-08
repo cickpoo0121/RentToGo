@@ -18,55 +18,68 @@ app.use(express.urlencoded({ extended: true }))
 
 //--------- Hash password ----------
 
-app.get('/password/:pass', function (req, res) {
-    const raw = req.params.pass;
-    bycypt.hash(raw, 10, function (err, hash) {
-        if (err) {
-            console.log(err);
-            res.status(500).send('Hashing error');
-        } else {
-            res.send(hash);
-        }
-    })
-})
+// app.get('/password/:pass', function (req, res) {
+//     const raw = req.params.pass;
+//     bycypt.hash(raw, 10, function (err, hash) {
+//         if (err) {
+//             console.log(err);
+//             res.status(500).send('Hashing error');
+//         } else {
+//             res.send(hash);
+//         }
+//     })
+// })
 
 //----------- Login ----------------
 app.post('/login', function (req, res) {
-    const username = req.body.username;
-    const rawPassword = req.body.password;
+    const userEmail = req.body.userEmail;
+    const nameOfUser = req.body.nameOfUser;
 
-    const sql = 'SELECT password FROM user WHERE username=?';
-    con.query(sql, [username], function (err, result) {
+    const sql = 'SELECT NameOfUser FROM user WHERE userEmail=?';
+    con.query(sql, [userEmail], function (err, result) {
         if (err) {
             console.log(err);
             res.status(500).send('Server error');
         } else {
             //user found?
             if (result.length != 1) {
-                res.status(400).send('Username is wrong');
-            }
-            else {
-                //check password
-                bycypt.compare(rawPassword, result[0].password, function (err, same) {
+                const sql = 'INSERT INTO user (UserEmail, NameOfUser) VALUES (?, ?)';
+
+                con.query(sql, [userEmail, nameOfUser], function (err, result) {
                     if (err) {
-                        console.log(err)
-                        res.status(500).send('Authen server error');
+                        console.log(err);
+                        res.status.send('Server error add user fail')
                     }
                     else {
-                        if (same) {
-                            res.status(200).send('Login Ok');
-                        }
-                        else {
-                            res.status(400).send('Wrong password');
-                        }
+                        res.status(200).send('Login Ok, add user')
                     }
-                });
+                })
+
+            }
+            else {
+                res.status(200).send('Login Ok')
+
             }
         }
     });
 
-
 });
+
+//----------- Home Infomation ----------------
+
+app.get('/trip',function(req,res){
+    const sql ='SELECT * FROM trip';
+    con.query(sql,function(err,result){
+        if(err){
+            console.log(err)
+            res.status(500).send('Server error');
+        }
+        else{
+            res.status(200).send(result);
+        }
+    });
+})
+
 
 //========== Starting Server ============
 app.listen(3000, function () {

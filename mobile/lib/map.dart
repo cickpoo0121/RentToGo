@@ -1,7 +1,11 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:rentogo/constance.dart';
-// import 'package:location/location.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -11,32 +15,87 @@ class TravelMap extends StatefulWidget {
 }
 
 class _TravelMapState extends State<TravelMap> {
-  List<Marker> allMarker = [];
+  Set<Marker> _markers = {};
+  Set<Polyline> _polylines = {};
+  List<LatLng> polylineCoordinates = [];
+  PolylinePoints polylinePoints = PolylinePoints();
   GoogleMapController mapController;
+  Completer<GoogleMapController> _controller = Completer();
   double lat, lng;
   LatLng currentPosition;
+  String googleAPIKey = "AIzaSyCDi57wwdz3uWlazz97SkFNET5jDh2Hdjo";
+  // double CAMERA_ZOOM = 13;
+  // double CAMERA_TILT = 0;
+  // double CAMERA_BEARING = 30;
+  // LatLng SOURCE_LOCATION = LatLng(42.7477863, -71.1699932);
+  // LatLng DEST_LOCATION = LatLng(42.6871386, -71.2143403);
+
+  BitmapDescriptor sourceIcon;
+  BitmapDescriptor destinationIcon;
+
   // final LatLng _center = const LatLng(20.336635, 99.810514);
 
+  static LatLng _lat1 = LatLng(20.0580112, 99.898658);
+  static LatLng _lat2 = LatLng(20.0491525, 99.891911);
+
   void locatePosition() async {
+    // var permission =
+    //     await await Permission.locationWhenInUse.serviceStatus.isEnabled;
+    // print(permission);
     Position position = await Geolocator.getCurrentPosition();
     // currentPosition = position;
+      
     setState(() {
       currentPosition = LatLng(position.latitude, position.longitude);
       lat = position.latitude;
       lng = position.longitude;
+      polylineCoordinates.add(_lat1);
+      polylineCoordinates.add(_lat2);
+
+      // polylineCoordinates
     });
     print('lat:$lat   lng:$lng');
   }
 
-  Set<Marker> marker() {
-    return <Marker>[
+  // Future<String> getRouteCoordinates(LatLng l1, LatLng l2) async {
+  //   var url =
+  //       'https://maps.googleapis.com/maps/api/directions/json?origin=${l1.latitude},${l1.longitude}&destination=${l2.latitude},${l2.longitude}&key=$googleAPIKey';
+  //   http.Response response = await http.get(url);
+  //   Map values = jsonDecode(response.body);
+  //   print(values);
+  //   return values["routes"][0]["overview_polyline"]["points"];
+  // }
+
+  // Set<Marker> marker() {
+  //   return <Marker>[
+  //     // allMarker.add(
+  //     Marker(
+  //       markerId: MarkerId('myMarker'),
+  //       draggable: false,
+  //       position: LatLng(lat, lng),
+  //       // ),
+  //     )
+  //   ].toSet();
+  // }
+
+  Set<Polyline> createPolyline() {
+    return <Polyline>[
       // allMarker.add(
-      Marker(
-        markerId: MarkerId('myMarker'),
-        draggable: false,
-        position: LatLng(lat, lng),
-        // ),
-      )
+      // Polyline(
+      //     width: 10,
+      //     points: polylineCoordinates,
+      //     endCap: Cap.roundCap,
+      //     startCap: Cap.roundCap,
+      //     color: Colors.green)
+      Polyline(
+        polylineId: PolylineId('line1'),
+        visible: true,
+        points: polylineCoordinates,
+        width: 2,
+        color: Colors.blue,
+        startCap: Cap.roundCap,
+        endCap: Cap.roundCap,
+      ),
     ].toSet();
   }
 
@@ -44,11 +103,89 @@ class _TravelMapState extends State<TravelMap> {
     mapController = controller;
   }
 
+  // void createRoute(String encondedPoly) {
+  //   _polylines.add(Polyline(
+  //       polylineId: PolylineId('i'),
+  //       width: 4,
+  //       points: _convertToLatLng(_decodePoly(encondedPoly)),
+  //       color: Colors.red));
+  // }
+
+  // void sendRequest() async {
+  //   // LatLng destination = LatLng(20.008751, 73.780037);
+  //   String route = await getRouteCoordinates(_lat1, _lat2);
+  //   print(route);
+  //   // createPolyline(route);
+  //   // _addMarker(destination,"KTHM Collage");
+  // }
+
+  //  createPolyline() {
+  //   // setState(() {
+  //   //   _polylines.add(
+  //   //     Polyline(
+  //   //       polylineId: PolylineId('line1'),
+  //   //       visible: true,
+  //   //       points: _convertToLatLng(_decodePoly(encondedPoly)),
+  //   //       width: 2,
+  //   //       color: Colors.blue,
+  //   //       startCap: Cap.roundCap,
+  //   //       endCap: Cap.roundCap,
+  //   //     ),
+  //   //   );
+  //   // });
+  //   // allMarker.add(
+  //   Polyline(
+  //       width: 10,
+  //       points: polylineCoordinates,
+  //       endCap: Cap.roundCap,
+  //       startCap: Cap.roundCap,
+  //       color: Colors.green);
+  // }
+
+  // List<LatLng> _convertToLatLng(List points) {
+  //   List<LatLng> result = <LatLng>[];
+  //   for (int i = 0; i < points.length; i++) {
+  //     if (i % 2 != 0) {
+  //       result.add(LatLng(points[i - 1], points[i]));
+  //     }
+  //   }
+  //   return result;
+  // }
+
+  // List _decodePoly(String poly) {
+  //   var list = poly.codeUnits;
+  //   var lList = new List();
+  //   int index = 0;
+  //   int len = poly.length;
+  //   int c = 0;
+  //   do {
+  //     var shift = 0;
+  //     int result = 0;
+  //     do {
+  //       c = list[index] - 63;
+  //       result |= (c & 0x1F) << (shift * 5);
+  //       index++;
+  //       shift++;
+  //     } while (c >= 32);
+  //     if (result & 1 == 1) {
+  //       result = ~result;
+  //     }
+  //     var result1 = (result >> 1) * 0.00001;
+  //     lList.add(result1);
+  //   } while (index < len);
+  //   for (var i = 2; i < lList.length; i++) lList[i] += lList[i - 2];
+  //   print(lList.toString());
+  //   return lList;
+  // }
+
   @override
   void initState() {
     super.initState();
+    // setSourceAndDestinationIcons();
     // findLatLng();
     locatePosition();
+    // sendRequest();
+
     // marker();
   }
 
@@ -67,7 +204,7 @@ class _TravelMapState extends State<TravelMap> {
               child: lat == null ? MyStyle().circleProgress() : showMap(),
             ),
             SlidingUpPanel(
-              minHeight: 130,
+              minHeight: 110,
               // color: Colors.red,
               panel: Container(
                 child: Column(
@@ -75,6 +212,27 @@ class _TravelMapState extends State<TravelMap> {
                     Icon(
                       Icons.maximize_rounded,
                       size: 50,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 30),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20, right: 20),
+                        child: Row(
+                          children: [
+                            Spacer(),
+                            Text(
+                              'แอ๋วกิ๋วฟิน West',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Spacer(),
+                            Icon(Icons.favorite_border_outlined,
+                                color: Colors.red)
+                          ],
+                        ),
+                      ),
                     ),
                     ListTravelPlace(),
                   ],
@@ -117,15 +275,16 @@ class _TravelMapState extends State<TravelMap> {
   Container showMap() {
     return Container(
       child: GoogleMap(
-        // onMapCreated: _onMapCreated,
         myLocationEnabled: true,
-        zoomGesturesEnabled: true,
-        zoomControlsEnabled: true,
+        compassEnabled: true,
+        tiltGesturesEnabled: false,
+        markers: _markers,
+        polylines: _polylines,
+        mapType: MapType.normal,
         initialCameraPosition: CameraPosition(
           target: currentPosition,
           zoom: 16.0,
         ),
-        // markers: marker(),
       ),
     );
   }
