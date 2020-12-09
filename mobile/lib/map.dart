@@ -15,78 +15,103 @@ class TravelMap extends StatefulWidget {
 }
 
 class _TravelMapState extends State<TravelMap> {
-  Set<Marker> _markers = {};
+  Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   Set<Polyline> _polylines = {};
   List<LatLng> polylineCoordinates = [];
   PolylinePoints polylinePoints = PolylinePoints();
   GoogleMapController mapController;
   Completer<GoogleMapController> _controller = Completer();
   double lat, lng;
-  LatLng currentPosition;
+  // var currentPosition;
+  var currentLng, currentLat;
   String googleAPIKey = "AIzaSyCDi57wwdz3uWlazz97SkFNET5jDh2Hdjo";
-  // double CAMERA_ZOOM = 13;
-  // double CAMERA_TILT = 0;
-  // double CAMERA_BEARING = 30;
-  // LatLng SOURCE_LOCATION = LatLng(42.7477863, -71.1699932);
-  // LatLng DEST_LOCATION = LatLng(42.6871386, -71.2143403);
-
-  BitmapDescriptor sourceIcon;
-  BitmapDescriptor destinationIcon;
-
-  // final LatLng _center = const LatLng(20.336635, 99.810514);
-
+  List data;
+  var tripID;
   static LatLng _lat1 = LatLng(20.0580112, 99.898658);
   static LatLng _lat2 = LatLng(20.0491525, 99.891911);
 
   void locatePosition() async {
-    // var permission =
-    //     await await Permission.locationWhenInUse.serviceStatus.isEnabled;
-    // print(permission);
     Position position = await Geolocator.getCurrentPosition();
     // currentPosition = position;
-      
-    setState(() {
-      currentPosition = LatLng(position.latitude, position.longitude);
-      lat = position.latitude;
-      lng = position.longitude;
-      polylineCoordinates.add(_lat1);
-      polylineCoordinates.add(_lat2);
 
-      // polylineCoordinates
+    setState(() {
+      // findCurrentPosition(position.latitude, position.longitude);
+      // currentLat = position.latitude;
+      // currentLng = position.longitude;
+      lat = position.latitude;
+      // print(currentPosition);
+
+      // lng = position.longitude;
+      // polylineCoordinates.add(_lat1);
+      // polylineCoordinates.add(_lat2);
     });
     print('lat:$lat   lng:$lng');
   }
 
-  // Future<String> getRouteCoordinates(LatLng l1, LatLng l2) async {
-  //   var url =
-  //       'https://maps.googleapis.com/maps/api/directions/json?origin=${l1.latitude},${l1.longitude}&destination=${l2.latitude},${l2.longitude}&key=$googleAPIKey';
-  //   http.Response response = await http.get(url);
-  //   Map values = jsonDecode(response.body);
-  //   print(values);
-  //   return values["routes"][0]["overview_polyline"]["points"];
+  // findCurrentPosition(var lat, var lng) {
+  //   setState(() {
+  //     currentPosition = LatLng(lat, lng);
+  //   });
   // }
 
-  Set<Marker> marker() {
-    return <Marker>[
-      // allMarker.add(
-      Marker(
-        markerId: MarkerId('myMarker'),
-        draggable: false,
-        position: LatLng(_lat2.latitude, _lat2.longitude),
-        // ),
-      )
-    ].toSet();
+  void getTripInfo() async {
+    http.Response response =
+        await http.get(url + '/tripInfo/' + tripID.toString());
+    if (response.statusCode == 200) {
+      setState(() {
+        data = json.decode(response.body);
+        print(data[0]['Lat']);
+        for (int i = 0; i < data.length; i++) {
+          double lat = double.parse(data[i]['Lat']);
+          double lng = double.parse(data[i]['Lng']);
+          loc(lat, lng);
+        }
+        int haftDataLength = (data.length / 2).round();
+        currentLat = double.parse(data[haftDataLength]['Lat']);
+        currentLng = double.parse(data[haftDataLength]['Lng']);
+        // currentLat = _lat2.latitude;
+        // currentLng = _lat2.longitude;
+      });
+    }
+    // print(currentLat);
+  }
+
+  void addMarker() {
+    setState(() {
+      for (int i = 0; i < data.length; i++) {
+        double lat = double.parse(data[i]['Lat']);
+        double lng = double.parse(data[i]['Lng']);
+        loc(lat, lng);
+      }
+      int haftDataLength = (data.length / 2).round();
+      // currentLat = double.parse(data[haftDataLength]['Lat']);
+      // currentLng = double.parse(data[haftDataLength]['Lng']);
+      currentLat = _lat2.latitude;
+      currentLng = _lat2.longitude;
+      // findCurrentPosition(double.parse(data[haftDataLength]['Lat']),
+      //     double.parse(data[haftDataLength]['Lng']));
+      // currentPosition = LatLng(double.parse(data[haftDataLength]['Lat']),
+      //     double.parse(data[haftDataLength]['Lng']));
+    });
+  }
+
+  void loc(var lat, var lng) {
+    final LatLng latlng = LatLng(lat, lng);
+    final MarkerId markerId = MarkerId((markers.length + 1).toString());
+    final Marker marker = Marker(
+      markerId: markerId,
+      position: latlng,
+      icon: BitmapDescriptor.defaultMarker,
+      draggable: false,
+      zIndex: 1,
+    );
+    setState(() {
+      markers[markerId] = marker;
+    });
   }
 
   Set<Polyline> createPolyline() {
     return <Polyline>[
-      // allMarker.add(
-      // Polyline(
-      //     width: 10,
-      //     points: polylineCoordinates,
-      //     endCap: Cap.roundCap,
-      //     startCap: Cap.roundCap,
-      //     color: Colors.green)
       Polyline(
         polylineId: PolylineId('line1'),
         visible: true,
@@ -103,87 +128,22 @@ class _TravelMapState extends State<TravelMap> {
     mapController = controller;
   }
 
-  // void createRoute(String encondedPoly) {
-  //   _polylines.add(Polyline(
-  //       polylineId: PolylineId('i'),
-  //       width: 4,
-  //       points: _convertToLatLng(_decodePoly(encondedPoly)),
-  //       color: Colors.red));
-  // }
-
-  // void sendRequest() async {
-  //   // LatLng destination = LatLng(20.008751, 73.780037);
-  //   String route = await getRouteCoordinates(_lat1, _lat2);
-  //   print(route);
-  //   // createPolyline(route);
-  //   // _addMarker(destination,"KTHM Collage");
-  // }
-
-  //  createPolyline() {
-  //   // setState(() {
-  //   //   _polylines.add(
-  //   //     Polyline(
-  //   //       polylineId: PolylineId('line1'),
-  //   //       visible: true,
-  //   //       points: _convertToLatLng(_decodePoly(encondedPoly)),
-  //   //       width: 2,
-  //   //       color: Colors.blue,
-  //   //       startCap: Cap.roundCap,
-  //   //       endCap: Cap.roundCap,
-  //   //     ),
-  //   //   );
-  //   // });
-  //   // allMarker.add(
-  //   Polyline(
-  //       width: 10,
-  //       points: polylineCoordinates,
-  //       endCap: Cap.roundCap,
-  //       startCap: Cap.roundCap,
-  //       color: Colors.green);
-  // }
-
-  // List<LatLng> _convertToLatLng(List points) {
-  //   List<LatLng> result = <LatLng>[];
-  //   for (int i = 0; i < points.length; i++) {
-  //     if (i % 2 != 0) {
-  //       result.add(LatLng(points[i - 1], points[i]));
-  //     }
-  //   }
-  //   return result;
-  // }
-
-  // List _decodePoly(String poly) {
-  //   var list = poly.codeUnits;
-  //   var lList = new List();
-  //   int index = 0;
-  //   int len = poly.length;
-  //   int c = 0;
-  //   do {
-  //     var shift = 0;
-  //     int result = 0;
-  //     do {
-  //       c = list[index] - 63;
-  //       result |= (c & 0x1F) << (shift * 5);
-  //       index++;
-  //       shift++;
-  //     } while (c >= 32);
-  //     if (result & 1 == 1) {
-  //       result = ~result;
-  //     }
-  //     var result1 = (result >> 1) * 0.00001;
-  //     lList.add(result1);
-  //   } while (index < len);
-  //   for (var i = 2; i < lList.length; i++) lList[i] += lList[i - 2];
-  //   print(lList.toString());
-  //   return lList;
-  // }
-
   @override
   void initState() {
     super.initState();
     // setSourceAndDestinationIcons();
     // findLatLng();
-    locatePosition();
+    Future.delayed(Duration.zero, () {
+      setState(() {
+        tripID = ModalRoute.of(context).settings.arguments;
+        getTripInfo();
+      });
+      print(tripID);
+      locatePosition();
+    });
+    // loc(_lat1);
+    // loc(_lat2);
+
     // sendRequest();
 
     // marker();
@@ -191,6 +151,7 @@ class _TravelMapState extends State<TravelMap> {
 
   @override
   Widget build(BuildContext context) {
+    // tripID = ModalRoute.of(context).settings.arguments;
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -219,6 +180,12 @@ class _TravelMapState extends State<TravelMap> {
                         padding: const EdgeInsets.only(left: 20, right: 20),
                         child: Row(
                           children: [
+                            // Spacer(),
+                            Icon(
+                              Icons.favorite_border_outlined,
+                              color: Colors.red,
+                              size: 30,
+                            ),
                             Spacer(),
                             Text(
                               'แอ๋วกิ๋วฟิน West',
@@ -228,42 +195,55 @@ class _TravelMapState extends State<TravelMap> {
                               ),
                             ),
                             Spacer(),
-                            Icon(Icons.favorite_border_outlined,
-                                color: Colors.red)
+                            GestureDetector(
+                              child: CircleAvatar(
+                                foregroundColor: Colors.blue,
+                                child: Icon(
+                                  Icons.near_me,
+                                  color: Colors.blue,
+                                  size: 30,
+                                ),
+                              ),
+                              onTap: addMarker,
+                            ),
                           ],
                         ),
                       ),
                     ),
-                    ListTravelPlace(),
+                    ListView.builder(
+                      physics: NeverScrollableScrollPhysics(),
+                      // scrollDirection: Axis.vertical,
+                      shrinkWrap: true,
+                      itemCount: data.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Text(data[index]['TripInfoPlaceName']),
+                          subtitle: Row(
+                            children: [
+                              Text(
+                                '4.2',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Icon(
+                                Icons.star,
+                                size: 20,
+                                color: Colors.blue,
+                              ),
+                            ],
+                          ),
+                          // leading: Text('data'),
+                          trailing: SizedBox(
+                            // child: Image.asset('assets/images/Trip11.jpg'),
+                            child: Image.asset(
+                                'assets/images/${data[index]['TripInfoPlacePic']}'),
+                            height: 200,
+                            width: 100,
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
-
-                //TODO: ทำขอบมน
-                // decoration: BoxDecoration(
-                //   borderRadius: BorderRadius.circular(30),
-                //   color: Colors.white,
-                //   boxShadow: [
-                //     BoxShadow(
-                //       spreadRadius: 3,
-                //       color: Color(0x11000000).withOpacity(.1),
-                //     ),
-                //   ],
-                // ),
-                // decoration: BoxDecoration(
-                //   color: Colors.white,
-                //   boxShadow: [
-                //     BoxShadow(
-                //         blurRadius: 5,
-                //         spreadRadius: 2.0,
-                //         color: const Color(0x11000000))
-                //   ],
-                //   // shape: RoundedRectangleBorder(
-                //   borderRadius: BorderRadius.only(
-                //     topLeft: Radius.circular(20),
-                //     topRight: Radius.circular(20),
-                //   ),
-                //   // ),
-                // ),
               ),
             ),
           ],
@@ -278,11 +258,12 @@ class _TravelMapState extends State<TravelMap> {
         myLocationEnabled: true,
         compassEnabled: true,
         tiltGesturesEnabled: false,
-        markers: marker(),
-        polylines: createPolyline(),
+        markers: Set.of(markers.values),
+        // marker(),
+        // polylines: createPolyline(),
         mapType: MapType.normal,
         initialCameraPosition: CameraPosition(
-          target: currentPosition,
+          target: LatLng(currentLat, currentLng),
           zoom: 16.0,
         ),
       ),

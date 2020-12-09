@@ -33,88 +33,53 @@ class _TravelCardState extends State<TravelCard> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    return data == null
-        ? MyStyle().circleProgress()
-        : Container(
-            height: size.height / 1.42,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: data.length,
-              scrollDirection: Axis.vertical,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Image.asset(
-                              'assets/images/' + data[index]['TripPic']),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            data[index]['TripName'],
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
-                          ),
-                          Text(data[index]['TripDescription']),
-                        ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Travel Plan'.toUpperCase()),
+      ),
+      body: data == null
+          ? MyStyle().circleProgress()
+          : Container(
+              height: size.height / 1.2,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: data.length,
+                scrollDirection: Axis.vertical,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Image.asset(
+                                'assets/images/' + data[index]['TripPic']),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              data[index]['TripName'],
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                            Text(data[index]['TripDescription']),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  onTap: () {
-                    print(data);
-                    Navigator.pushNamed(
-                      context,
-                      '/map',
-                      arguments: data[index]['TripID'],
-                    );
-                  },
-                );
-                //  ListTile(
-                //   title: Text(data[index]['title']),
-                //   // subtitle: Text(data[index]['subtitle']),
-                //   // trailing: SizedBox(
-                //   //   child: Image.asset(data[index]['image']),
-                //   //   height: 50,
-                //   //   width: 50,
-                //   // ),
-                // );
-              },
+                    onTap: () {
+                      // print(data[index]['TripID']);
+                      Navigator.pushNamed(
+                        context,
+                        '/map',
+                        arguments: data[index]['TripID'],
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          );
-    // Column(
-    //   children: [
-    //     Card(
-    //       child: InkWell(
-    //         splashColor: Colors.blue.withAlpha(30),
-    //         onTap: () {
-    //           print('Card tapped.');
-    //         },
-    //         child: Padding(
-    //           padding: const EdgeInsets.all(10.0),
-    //           child: Column(
-    //             crossAxisAlignment: CrossAxisAlignment.start,
-    //             children: [
-    //               Image.asset(
-    //                 'assets/images/'+_image
-    //               ),
-    //               SizedBox(
-    //                 height: 10,
-    //               ),
-    //               Text(
-    //                 _tripName,
-    //                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-    //               ),
-    //               Text(_description),
-    //             ],
-    //           ),
-    //         ),
-    //       ),
-    //     ),
-    //   ],
-    // );
+    );
   }
 }

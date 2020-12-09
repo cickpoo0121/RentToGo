@@ -1,7 +1,6 @@
-POST http://localhost:3000/login HTTP/1.1
+PUT http://localhost:3000/payMent/9 HTTP/1.1
 content-type: application/json
 
 {
-    "username": "tee",
-    "password": "1234"
+    # "resIDA": 9,
 }

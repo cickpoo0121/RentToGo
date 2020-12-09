@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:rentogo/carCard.dart';
+import 'package:rentogo/carInfo.dart';
 import 'package:rentogo/createTrip.dart';
 import 'package:rentogo/home.dart';
 import 'package:rentogo/login.dart';
@@ -6,17 +8,22 @@ import 'package:rentogo/map.dart';
 import 'package:rentogo/mapTest.dart';
 import 'package:rentogo/profile.dart';
 import 'package:rentogo/register.dart';
+import 'package:rentogo/reservations.dart';
 
 void main() {
   runApp(
     MaterialApp(
       // home: TravelMap(),
-      initialRoute: '/home',
+      initialRoute: '/login',
       routes: {
         '/login':(context)=>Login(),
         '/register':(context)=>Register(),
         '/home':(context)=>Homepage(),
         '/map':(context)=>TravelMap(),
+        '/carCard':(context)=>CarInfo(),
+        '/res':(context)=>Reservations(),
+
+
       },
       // theme: ThemeData(
       //   // primaryColor: Colors.blue[900],

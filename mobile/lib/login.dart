@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rentogo/auth.dart';
 import 'package:rentogo/constance.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -11,17 +12,16 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   // String _url = 'http://10.0.2.2:3000/login';
 
-
-
   void addUser() async {
     http.Response response = await http.post(
-      url+'/login',
+      url + '/login',
       body: {'nameOfUser': name, 'userEmail': email},
     );
 
     if (response.statusCode == 200) {
       //OK
       print(response.body.toString());
+
       Navigator.pushReplacementNamed(context, '/home');
     } else {
       print(response.body.toString());
@@ -33,7 +33,7 @@ class _LoginState extends State<Login> {
       (result) {
         if (result != null) {
           addUser();
-      // Navigator.pushReplacementNamed(context, '/home');
+          // Navigator.pushReplacementNamed(context, '/home');
         } else {
           print('Error Auth from Firebase');
         }

@@ -2,10 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:rentogo/carCard.dart';
 import 'package:rentogo/constance.dart';
 import 'package:rentogo/createTrip.dart';
-import 'package:rentogo/favoritePlane.dart';
 import 'package:rentogo/profile.dart';
+import 'package:rentogo/reservations.dart';
 import 'package:rentogo/travelCard.dart';
 
 class Homepage extends StatefulWidget {
@@ -15,7 +16,7 @@ class Homepage extends StatefulWidget {
 
 class _HomepageState extends State<Homepage> {
   TextEditingController _search = TextEditingController();
- 
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -59,45 +60,59 @@ class _HomepageState extends State<Homepage> {
           body: TabBarView(children: [
             Column(
               children: [
-                Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Image.asset(
-                        'assets/images/LOGO.png',
-                        width: 170,
-                      ),
-                    ),
-                  ],
-                ),
                 Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: TextField(
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      color: Colors.blueAccent,
-                    ),
-                    decoration: InputDecoration(
-                        contentPadding:
-                            EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-                        prefixIcon: Icon(Icons.search),
-                        hintText: "Search",
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: Colors.blueAccent, width: 32.0),
-                            borderRadius: BorderRadius.circular(25.0)),
-                        focusedBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: Colors.white, width: 32.0),
-                            borderRadius: BorderRadius.circular(25.0))),
+                  padding: const EdgeInsets.only(left: 10,top: 9),
+                  child: Row(
+                    children: [
+                      Text(
+                        'RentTo '.toUpperCase(),
+                        style: TextStyle(
+                          color: Colors.blue[300],
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text('GO',style: TextStyle(
+                          // color: Colors.blue[300],
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                        ),),
+                    ],
                   ),
                 ),
-                // Category(),
-                TravelCard(),
+                SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: TextField(
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            color: Colors.blueAccent,
+                          ),
+                          decoration: InputDecoration(
+                              contentPadding:
+                                  EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
+                              prefixIcon: Icon(Icons.search),
+                              hintText: "Search",
+                              border: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Colors.blueAccent, width: 32.0),
+                                  borderRadius: BorderRadius.circular(25.0)),
+                              focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Colors.white, width: 32.0),
+                                  borderRadius: BorderRadius.circular(25.0))),
+                        ),
+                      ),
+                      CarCard(),
+                    ],
+                  ),
+                ),
               ],
             ),
-            CreatTrip(),
-            FavoritePlane(),
+            TravelCard(),
+            Reservations(),
             Profile(),
           ]),
         ),
@@ -105,7 +120,6 @@ class _HomepageState extends State<Homepage> {
     );
   }
 }
-
 
 class Category extends StatefulWidget {
   @override
