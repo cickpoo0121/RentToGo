@@ -50,12 +50,13 @@
     </style>
 
     <script>
+        var tablecar
         $(document).ready(function () {
             $.ajax({
                 method: "GET",
                 url: "/Car",
                 success: function (data) {
-                    var tablecar = $("table#tablecar").DataTable({
+                    tablecar = $("table#tablecar").DataTable({
                         // data: dataSet,
                         "searching": false,
                         "paging": true,
@@ -78,7 +79,7 @@
                             { data: "CarDescription", title: "รายละเอียด" },
                             { data: "CarPrice", title: "ราคา/วัน" },
                             { data: "CarStatus", title: "สถานะ" },
-                            // { defaultContent: "<button id='btnEdit' class='btn btn-warning text-light'>แก้ไข</button> ", orderable: false, title: "แก้ไข" },
+                            { defaultContent: "<button  class='btn btn-warning btnEdit text-light'>แก้ไข</button> ", orderable: false, title: "แก้ไข" },
                             //     { defaultContent: "<button id='view' class='btn btn-danger'>ลบ</button>", orderable: false, title: "ลบ" 
                             // }
                         ],
@@ -87,7 +88,7 @@
 
                     for (let i = 0; i < data.length; i++) {
                         data[i].No = i + 1
-                        data[i].CarStatus == 0 ?  data[i].CarStatus ='ว่างให้เช่า' :  data[i].CarStatus ='กำลังเช่า'
+                        data[i].CarStatus == 0 ? data[i].CarStatus = 'ว่างให้เช่า' : data[i].CarStatus = 'กำลังเช่า'
                         // dataSet[i].cardesc = '<b>' + dataSet[i].gen + '</b><div>intro:' + dataSet[i].cardesc + '</div><div>ว/ด/ป : ' + dataSet[i].date + '</div>'
                         // if (dataSet[i].cardesc == 2) {
                         //     dataSet[i].Role = "กรรมการ"
@@ -100,34 +101,116 @@
 
                     tablecar.clear();
                     tablecar.rows.add(data).draw();
+
+                    $.ajax({
+                        type: "GET",
+                        url: "/getSumation",
+                        success: function (data) {
+                            $('#notRent').html(data[0].notRent);
+                            $('#isRent').html(data[0].isRent);
+                            $('#all').html(data[0].allCar);
+                            // console.log(data[0].notRent)
+
+                        }
+                    });
+
+                    $('#addCar').click(function () {
+                        $('#addcarModal').modal('toggle');
+                        $('#update').hide();
+                        $('#save').show();
+                        $('#hideStatus').hide()
+
+                        $('#carname').val('')
+                        $('#cardesc').val('')
+                        $('#carprice').val('')
+                        $('#carStatus').val('')
+                        // alert('aa')
+
+                    });
+
+
+
+                    $('#tablecar tbody').on('click', 'tr', function () {
+                        // alert('aaa')
+                        var data = tablecar.row(this).data();
+                        var CarName = data.CarName
+                        var CarDescription = data.CarDescription
+                        var CarPrice = data.CarPrice
+                        var CarStatus = data.CarStatus
+                        var CarID = data.CarID
+
+                        CarStatus == 'กำลังเช่า' ? CarStatus = 1 : CarStatus = 0
+
+
+                        $('#carname').val(CarName)
+                        $('#cardesc').val(CarDescription)
+                        $('#carprice').val(CarPrice)
+                        $('#carStatus').val(CarStatus)
+
+
+
+                        // CarStatusq = $('#carStatus').val(CarStatus)
+
+
+
+                        $('#addcarModal').modal('toggle');
+                        $('#save').hide();
+                        $('#update').show();
+                        $('#hideStatus').show()
+
+                        $('#update').click(function () {
+                            CarStatusq = $('#carStatus').val()
+                            CarNameq = $('#carname').val()
+                            CarDescriptionq = $('#cardesc').val()
+                            CarPriceq = $('#carprice').val()
+                            console.log(CarStatusq)
+
+                            $.ajax({
+                                type: "PUT",
+                                url: "/updateCar",
+                                data: { CarName: CarNameq, CarDescription: CarDescriptionq, CarPrice: CarPriceq, CarStatu: CarStatusq, CarID: CarID },
+                            }).done(function (dataset, xhr, err) {
+                                window.location.reload()
+                            }).fail(function (xhr, state, error) {
+                                alert("fail")
+                                console.log(error)
+                            })
+                        });
+                        console.log(data)
+
+                    })
+
+
+
+
+                    $('#save').click(function (e) {
+                        carname = $('#carname').val()
+                        cardesc = $('#cardesc').val()
+                        carprice = $('#carprice').val()
+
+                        // carStatus = $('#carStatus').val(CarStatus)
+
+
+                        // alert(carname + ' ' + cardesc + ' ' + carprice + ' ' + returndate)
+
+                        $.ajax({
+                            method: "POST",
+                            url: "/addCar",
+                            data: { CarName: carname, CarDescription: cardesc, CarPrice: carprice, },
+                        }).done(function (dataSet, state, xhr) {
+                            window.location.reload()
+                        }).fail(function (xhr, state, error) {
+                            alert("fail")
+                            console.log(error)
+                        })
+
+                    });
                 }
             });
 
-            $('#save').click(function (e) {
-                carname = $('#carname').val()
-                cardesc = $('#cardesc').val()
-                carprice = $('#carprice').val()
-                returndate = $('#returndate').val()
 
-                alert(carname + ' ' + cardesc + ' ' + carprice + ' ' + returndate)
 
-                $.ajax({
-                    method: "POST",
-                    url: "/addCar",
-                    data: { CarName: carname, CarDescription: cardesc, CarPrice: carprice, ReturnDate: returndate },
-                }).done(function (dataSet, state, xhr) {
-                    window.location.reload()
-                }).fail(function (xhr, state, error) {
-                    alert("fail")
-                    console.log(error)
-                })
 
-            });
-
-            // $('#btnEdit').click(function (e) { 
-            //     e.preventDefault();
-
-            // });
 
 
             //<============Edit btn ============>
@@ -199,10 +282,10 @@
                 <!-- sidebar menu: : style can be found in sidebar.less -->
                 <ul class="sidebar-menu tree" data-widget="tree">
                     <li class="header text-center" style="color: white;font-size: medium;">เมนู</li>
-                    <li><a href="/admin"><i class="fa fa-home"></i>
+                    <li><a href="/"><i class="fa fa-home"></i>
                             <span>หน้าแรก</span></a></li>
-                    <li><a href="/carshop"><i class="fa fa-car"></i>
-                            <span>รายการรถ</span></a></li>
+                    <!-- <li><a href="/carshop"><i class="fa fa-car"></i>
+                            <span>รายการรถ</span></a></li> -->
                     <!-- <li><a href="/admin"><i class="fa fa-circle"></i>
                             <span>Admin/Member</span></a></li> -->
                     <!-- <li><a href="https://devbanban.com/app/carrent/renting"><i class="fa fa-circle"></i>
@@ -214,15 +297,60 @@
                             <span>เกี่ยวกับ/About</span></a></li>
                     <li><a href="https://devbanban.com/app/carrent/contact"><i class="fa fa-info-circle"></i>
                             <span>ติดต่อ</span></a></li> -->
-                    <li><a href="/" onclick="return confirm('do you want to logout ?');"><i class="fa fa-edit"></i>
+                    <!-- <li><a href="/" onclick="return confirm('do you want to logout ?');"><i class="fa fa-edit"></i>
                             <span>Logout</span></a></li>
-                </ul>
+                </ul> -->
             </section>
             <!-- /.sidebar -->
         </aside>
         <div class="content-wrapper" style="min-height: 621px;">
             <!-- Content Header (Page header) -->
             <section class="content-header">
+                <div class="row justify-content-around">
+                    <div class="col-md-4 col-sm-4 col-xs-4">
+                        <div class="info-box" style="border: 1px solid #8dcff4;">
+                            <span class="info-box-icon bg-aqua"><i class="fas fa-layer-group mt-4"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">จำนวนรถทั้งหมด</span>
+                                <span class="info-box-number" id="all">0</span>
+                            </div>
+                            <!-- /.info-box-content -->
+                        </div>
+                        <!-- /.info-box -->
+                    </div>
+                    <!-- /.col -->
+                    <div class="col-md-4 col-sm-4 col-xs-4">
+                        <div class="info-box" style="border: 1px solid green;">
+                            <span class="info-box-icon bg-success"><i class="fas fa-box-open mt-4"
+                                    style="color: white;"></i></span>
+
+                            <div class="info-box-content">
+                                <span class="info-box-text">จำนวนรถที่กำลังเช่า</span>
+                                <span class="info-box-number" id="isRent">0</span>
+                            </div>
+                            <!-- /.info-box-content -->
+                        </div>
+                        <!-- /.info-box -->
+                    </div>
+                    <!-- /.col -->
+
+                    <!-- fix for small devices only -->
+                    <div class="clearfix visible-sm-block"></div>
+
+                    <div class="col-md-4 col-sm-4 col-xs-4">
+                        <div class="info-box" style="border: 1px solid #f39c12;">
+                            <span class="info-box-icon bg-yellow"><i class="fas fa-box mt-4"></i></span>
+
+                            <div class="info-box-content">
+                                <span class="info-box-text">จำนวนรถที่ไม่ถูกเช่า</span>
+                                <span class="info-box-number" id="notRent">0</span>
+                            </div>
+                            <!-- /.info-box-content -->
+                        </div>
+                        <!-- /.info-box -->
+                    </div>
+
+                </div>
                 <h1>
                     จัดการข้อมูลรถเช่า
                 </h1>
@@ -237,8 +365,7 @@
                     <div class="box-body">
                         <div class="row">
                             <div class="col-sm-6">
-                                <button class="btn btn-success" data-toggle="modal"
-                                    data-target="#addcar">เพิ่มข้อมูล</button>
+                                <button class="btn btn-success" id="addCar">เพิ่มข้อมูล</button>
                             </div>
                             <div class="col-sm-6">
                             </div>
@@ -257,7 +384,7 @@
         </div><!-- /.content-wrapper -->
 
         <!-- Modal -->
-        <div class="modal fade" id="addcar" tabindex="-1" role="dialog" aria-labelledby="modelTitleId"
+        <div class="modal fade" id="addcarModal" tabindex="-1" role="dialog" aria-labelledby="modelTitleId"
             aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -316,14 +443,23 @@
 
                         </div>
 
-                        <div class=" row mt-3">
+                        <div class=" row mt-3" id="hideStatus">
                             <div class="col-sm-3 control-label mt-2">
-                                <b>วันที่คืน</b>
+                                <b>สถานะ</b>
                             </div>
                             <div class="col-sm-8 ml-2">
-                                <input type="text" id="returndate" class="form-control"
+                                <!-- <input type="text" id="returndate" class="form-control"
                                     style=" border: 1px solid #8dcff4;border-radius: 5px;width: 80%;"
-                                    placeholder="28/11/2020">
+                                    placeholder="28/11/2020"> -->
+
+                                <!-- <input type="checkbox" class="form-check-input" id="carStatus" value="0"> -->
+
+                                <select name="" id="carStatus" class="form-control"
+                                    style=" border: 1px solid #8dcff4;border-radius: 5px;width: 80%;">
+                                    <option value="0">ว่างให้เช่า</option>
+                                    <option value="1">กำลังเช่า</option>
+                                </select>
+
                             </div>
 
                         </div>
@@ -333,10 +469,13 @@
                         <button type="button" class="btn btn-secondary" data-dismiss="modal"
                             style="width: 15%;">ปิด</button>
                         <button type="button" class="btn btn-success" id="save">บันทึก</button>
+                        <button type="button" class="btn btn-success" id="update">บันทึก</button>
+
                     </div>
                 </div>
             </div>
         </div>
+
         <footer class="main-footer">
             <div class="pull-right hidden-xs">
                 <b>Website @ 2020</b>

@@ -144,12 +144,36 @@ app.get("/tripDetail/:Tripid", function (req, res) {
     })
 })
 
-//--------------- Car --------------------
-app.get("/Car", function (req, res) {
-    const sql = "SELECT * FROM `car`"
+app.get("/Carmobile", function (req, res) {
+    const sql = "SELECT * FROM `car` WHERE CarStatus=0"
     con.query(sql, function (err, result, fields) {
         if (err) {
             res.status(503).send("เซิร์ฟเวอร์ไม่ตอบสนอง");
+        } else {
+            res.json(result)
+        }
+    })
+});
+
+//--------------- Car --------------------
+app.get("/Car", function (req, res) {
+    const sql = "SELECT * FROM car ORDER BY CarID  DESC"
+    con.query(sql, function (err, result, fields) {
+        if (err) {
+            res.status(503).send("เซิร์ฟเวอร์ไม่ตอบสนอง");
+        } else {
+            res.json(result)
+        }
+    })
+});
+
+app.put("/updateCar", function (req, res) {
+    const { CarName, CarDescription, CarPrice, CarStatu, CarID } = req.body;
+    const sql = "UPDATE car SET CarName = ?, CarDescription = ?, CarPrice = ?, CarStatus = ? WHERE CarID = ?;"
+    con.query(sql, [CarName, CarDescription, CarPrice, CarStatu, CarID], function (err, result, fields) {
+        if (err) {
+            res.status(503).send("Server");
+            console.log(err)
         } else {
             res.json(result)
         }
@@ -197,17 +221,45 @@ app.put("/updatePayment", function (req, res) {
 
 // --------------- add car -----------------
 app.post("/addCar", function (req, res) {
-    const { CarName, CarDescription, CarPrice, ReturnDate } = req.body
-    const sql = "INSERT INTO `car` (`CarName`, `CarPic`, `CarDescription`, `CarPrice`, `CarStatus`, `CarDisable`, `ReturnDate`, `CarOwner`) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
-    con.query(sql, [CarName, 'G70.jpg', CarDescription, CarPrice, 0, 0, ReturnDate, 3], function (err, result) {
+    const { CarName, CarDescription, CarPrice, } = req.body
+    const sql = "INSERT INTO `car` (`CarName`, `CarPic`, `CarDescription`, `CarPrice`, `CarStatus`, `CarDisable`, `CarOwner`) VALUES (?, ?, ?, ?, ?, ?, ?);"
+    con.query(sql, [CarName, 'G70.jpg', CarDescription, CarPrice, 0, 0, 3], function (err, result) {
         if (err) {
             res.status(500).send('serverError');
+            console.log(err)
         }
         else {
             res.status(200).send('ok')
         }
     })
 })
+
+app.get("/getSumation", function (req, res) {
+    const sql = "SELECT DISTINCT(SELECT COUNT(CarStatus) FROM car WHERE CarStatus = 0)AS notRent,(SELECT COUNT(CarStatus) FROM car WHERE CarStatus = 1)AS isRent, (SELECT COUNT(CarStatus) FROM car) AS allCar FROM car"
+    con.query(sql, function (err, result) {
+        if (err) {
+            res.status(500).send('serverError');
+        }
+        else {
+            res.json(result)
+        }
+    })
+})
+
+app.get("/searching/:keyWord", function (req, res) {
+    const keyWord=req.params.keyWord;
+    console.log(keyWord)
+    const sql = "SELECT * FROM `car` WHERE CarName LIKE'"+keyWord+"%'"
+    con.query(sql, function (err, result) {
+        if (err) {
+            res.status(500).send('serverError');
+        }
+        else {
+            res.json(result)
+        }
+    })
+})
+
 
 app.post("/reservations", function (req, res) {
     const { CarID, RenterID, DateRent, DateReturn, Price } = req.body
@@ -217,15 +269,24 @@ app.post("/reservations", function (req, res) {
             res.status(500).send('serverError');
         }
         else {
-            res.status(200).send('ok')
+            // res.status(200).send('okPost')
+            const sql = "UPDATE `car` SET `CarStatus` = 1 WHERE `car`.`CarID` = ?;"
+            con.query(sql, [CarID], function (err, result) {
+                if (err) {
+                    res.status(500).send('serverError');
+                }
+                else {
+                    res.status(200).send('okUpdate')
+                }
+            })
         }
     })
 })
 
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "/views/selectTrip.html"));
-    // res.render("home.ejs", {user: req.user});
-});
+// app.get("/", (req, res) => {
+//     res.sendFile(path.join(__dirname, "/views/adminhome.html"));
+//     // res.render("home.ejs", {user: req.user});
+// });
 
 //Return tripinfor page
 app.get("/tripinformation", function (req, res) {
@@ -233,6 +294,10 @@ app.get("/tripinformation", function (req, res) {
 });
 
 app.get("/carShop", function (req, res) {
+    res.sendFile(path.join(__dirname, "/views/carshop.html"))
+});
+
+app.get("/", function (req, res) {
     res.sendFile(path.join(__dirname, "/views/carshop.html"))
 });
 

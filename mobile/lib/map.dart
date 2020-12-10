@@ -138,9 +138,11 @@ class _TravelMapState extends State<TravelMap> {
         tripID = ModalRoute.of(context).settings.arguments;
         getTripInfo();
       });
+
       print(tripID);
       locatePosition();
     });
+
     // loc(_lat1);
     // loc(_lat2);
 
@@ -158,96 +160,110 @@ class _TravelMapState extends State<TravelMap> {
             // title: Text('Title'),
             // backgroundColor: Colors.white,
             ),
-        body: Stack(
-          children: [
-            Container(
-              // height: 500,
-              child: lat == null ? MyStyle().circleProgress() : showMap(),
-            ),
-            SlidingUpPanel(
-              minHeight: 110,
-              // color: Colors.red,
-              panel: Container(
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.maximize_rounded,
-                      size: 50,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 30),
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 20, right: 20),
-                        child: Row(
+        body: data == null
+            ? MyStyle().circleProgress()
+            : Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  Container(
+                    // height: 500,
+                    child: lat == null ? MyStyle().circleProgress() : showMap(),
+                  ),
+                  SlidingUpPanel(
+                    // maxHeight: MediaQuery.of(context).size.height / 1.5,
+                    // minHeight: 200,
+                    // panelSnapping: false,
+                    // backdropEnabled: true,
+                    // color: Colors.red,
+                    panel: Container(
+                      child: SingleChildScrollView(
+                        child: Column(
                           children: [
-                            // Spacer(),
                             Icon(
-                              Icons.favorite_border_outlined,
-                              color: Colors.red,
-                              size: 30,
+                              Icons.maximize_rounded,
+                              size: 50,
                             ),
-                            Spacer(),
-                            Text(
-                              'แอ๋วกิ๋วฟิน West',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Spacer(),
-                            GestureDetector(
-                              child: CircleAvatar(
-                                foregroundColor: Colors.blue,
-                                child: Icon(
-                                  Icons.near_me,
-                                  color: Colors.blue,
-                                  size: 30,
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 30),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 20, right: 20),
+                                child: Row(
+                                  children: [
+                                    // Spacer(),
+                                    Icon(
+                                      Icons.favorite_border_outlined,
+                                      color: Colors.red,
+                                      size: 30,
+                                    ),
+                                    Spacer(),
+                                    Text(
+                                      'แอ๋วกิ๋วฟิน West',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Spacer(),
+                                    GestureDetector(
+                                      child: CircleAvatar(
+                                        foregroundColor: Colors.blue,
+                                        child: Icon(
+                                          Icons.near_me,
+                                          color: Colors.blue,
+                                          size: 30,
+                                        ),
+                                      ),
+                                      onTap: addMarker,
+                                    ),
+                                  ],
                                 ),
                               ),
-                              onTap: addMarker,
+                            ),
+                            Container(
+                              height: 360,
+                              child: ListView.builder(
+                                physics: NeverScrollableScrollPhysics(),
+                                scrollDirection: Axis.vertical,
+                                shrinkWrap: true,
+                                itemCount: data.length,
+                                itemBuilder: (context, index) {
+                                  return ListTile(
+                                    title:
+                                        Text(data[index]['TripInfoPlaceName']),
+                                    subtitle: Row(
+                                      children: [
+                                        Text(
+                                          '4.2',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        Icon(
+                                          Icons.star,
+                                          size: 20,
+                                          color: Colors.blue,
+                                        ),
+                                      ],
+                                    ),
+                                    // leading: Text('data'),
+                                    trailing: SizedBox(
+                                      // child: Image.asset('assets/images/Trip11.jpg'),
+                                      child: Image.asset(
+                                          'assets/images/${data[index]['TripInfoPlacePic']}'),
+                                      height: 200,
+                                      width: 100,
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           ],
                         ),
                       ),
                     ),
-                    ListView.builder(
-                      physics: NeverScrollableScrollPhysics(),
-                      // scrollDirection: Axis.vertical,
-                      shrinkWrap: true,
-                      itemCount: data.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text(data[index]['TripInfoPlaceName']),
-                          subtitle: Row(
-                            children: [
-                              Text(
-                                '4.2',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              Icon(
-                                Icons.star,
-                                size: 20,
-                                color: Colors.blue,
-                              ),
-                            ],
-                          ),
-                          // leading: Text('data'),
-                          trailing: SizedBox(
-                            // child: Image.asset('assets/images/Trip11.jpg'),
-                            child: Image.asset(
-                                'assets/images/${data[index]['TripInfoPlacePic']}'),
-                            height: 200,
-                            width: 100,
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -271,67 +287,67 @@ class _TravelMapState extends State<TravelMap> {
   }
 }
 
-class ListTravelPlace extends StatefulWidget {
-  @override
-  _ListTravelPlaceState createState() => _ListTravelPlaceState();
-}
+// class ListTravelPlace extends StatefulWidget {
+//   @override
+//   _ListTravelPlaceState createState() => _ListTravelPlaceState();
+// }
 
-class _ListTravelPlaceState extends State<ListTravelPlace> {
-  List<Map<String, dynamic>> data = [
-    {
-      'title': 'ดอยช้างมูบ',
-      // 'subtitle': '9 baht',
-      'image': 'assets/images/Trip11.jpg'
-    },
-    {
-      'title': 'ดอยผาฮี้',
-      // 'subtitle': '3 baht',
-      'image': 'assets/images/Trip12.jpg'
-    },
-    {
-      'title': 'สวยคุณปู่',
-      // 'subtitle': '5 baht',
-      'image': 'assets/images/Trip13.jpg'
-    },
-    {
-      'title': 'ดอยผาหมี',
-      // 'subtitle': '14 baht',
-      'image': 'assets/images/Trip14.jpg'
-    },
-  ];
+// class _ListTravelPlaceState extends State<ListTravelPlace> {
+//   // List<Map<String, dynamic>> data = [
+//   //   {
+//   //     'title': 'ดอยช้างมูบ',
+//   //     // 'subtitle': '9 baht',
+//   //     'image': 'assets/images/Trip11.jpg'
+//   //   },
+//   //   {
+//   //     'title': 'ดอยผาฮี้',
+//   //     // 'subtitle': '3 baht',
+//   //     'image': 'assets/images/Trip12.jpg'
+//   //   },
+//   //   {
+//   //     'title': 'สวยคุณปู่',
+//   //     // 'subtitle': '5 baht',
+//   //     'image': 'assets/images/Trip13.jpg'
+//   //   },
+//   //   {
+//   //     'title': 'ดอยผาหมี',
+//   //     // 'subtitle': '14 baht',
+//   //     'image': 'assets/images/Trip14.jpg'
+//   //   },
+//   // ];
 
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      physics: NeverScrollableScrollPhysics(),
-      // scrollDirection: Axis.vertical,
-      shrinkWrap: true,
-      itemCount: data.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: Text(data[index]['title']),
-          subtitle: Row(
-            children: [
-              Text(
-                '4.2',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Icon(
-                Icons.star,
-                size: 20,
-                color: Colors.blue,
-              ),
-            ],
-          ),
-          // leading: Text('data'),
-          trailing: SizedBox(
-            // child: Image.asset('assets/images/Trip11.jpg'),
-            child: Image.asset(data[index]['image']),
-            height: 200,
-            width: 100,
-          ),
-        );
-      },
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return ListView.builder(
+//       physics: NeverScrollableScrollPhysics(),
+//       // scrollDirection: Axis.vertical,
+//       shrinkWrap: true,
+//       itemCount: data.length,
+//       itemBuilder: (context, index) {
+//         return ListTile(
+//           title: Text(data[index]['title']),
+//           subtitle: Row(
+//             children: [
+//               Text(
+//                 '4.2',
+//                 style: TextStyle(fontWeight: FontWeight.bold),
+//               ),
+//               Icon(
+//                 Icons.star,
+//                 size: 20,
+//                 color: Colors.blue,
+//               ),
+//             ],
+//           ),
+//           // leading: Text('data'),
+//           trailing: SizedBox(
+//             // child: Image.asset('assets/images/Trip11.jpg'),
+//             child: Image.asset(data[index]['image']),
+//             height: 200,
+//             width: 100,
+//           ),
+//         );
+//       },
+//     );
+//   }
+// }
